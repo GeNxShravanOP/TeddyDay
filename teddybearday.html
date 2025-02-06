@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Teddy Hug Simulator</title>
+    <style>
+        body {
+            text-align: center;
+            font-family: Arial, sans-serif;
+            background-color: #fce4ec;
+            overflow: hidden;
+            position: relative;
+        }
+        .teddy {
+            width: 250px;
+            transition: transform 0.2s ease-in-out;
+            position: relative;
+            z-index: 10;
+        }
+        .hug-meter, .progress-meter {
+            width: 700px;
+            height: 50px;
+            background-color: #ddd;
+            margin: 30px auto;
+            border-radius: 15px;
+            position: relative;
+            overflow: hidden;
+        }
+        .meter-fill {
+            height: 100%;
+            width: 0;
+            background-color: #ff4081;
+            transition: width 0.1s;
+        }
+        .target-zone {
+            height: 100%;
+            width: 15%;
+            background-color: rgba(255, 255, 0, 0.6);
+            position: absolute;
+        }
+        .message {
+            font-size: 24px;
+            margin-top: 10px;
+            font-weight: bold;
+        }
+        .corner-image {
+            position: absolute;
+            width: 10%;
+            height: 10%;
+            opacity: 0;
+            transition: all 9s ease-in-out;
+        }
+        .center-teddy {
+            position: absolute;
+            width: 450px;
+            display: none;
+            opacity: 0;
+            transition: transform 4s ease-in, opacity 4s ease-in;
+            z-index: 20;
+        }
+        @keyframes dance {
+            0%, 100% { transform: rotate(0deg); }
+            25% { transform: rotate(-10deg); }
+            50% { transform: rotate(10deg); }
+            75% { transform: rotate(-10deg); }
+        }
+        .dance {
+            animation: dance 1s infinite;
+        }
+    </style>
+</head>
+<body>
+    <h1>❤️ Teddy Game🧸 ❤️</h1>
+    <p>Press "Space" when the bar reaches the yellow zone!</p>
+    <img class="teddy" src="teddybear.png" alt="Teddy Bear" id="teddy">
+    <div class="hug-meter">
+        <div class="target-zone" id="targetZone"></div>
+        <div class="meter-fill" id="fill"></div>
+    </div>
+    <p class="message" id="message">Time your hugs perfectly! ❤️</p>
+    <div class="progress-meter">
+        <div class="meter-fill" id="progress"></div>
+    </div>
+    <audio id="winSound" src="a.mp3"></audio>
+    <audio id="finalSound" src="b.mp3"></audio>
+    
+    <img src="MODI.jpg" class="corner-image" id="corner1" style="top: 0; left: 0;">
+    <img src="TRUMP.jpg" class="corner-image" id="corner2" style="top: 0; right: 0;">
+    <img src="PUTIN.jpg" class="corner-image" id="corner3" style="bottom: 0; left: 0;">
+    <img src="KIM.jpg" class="corner-image" id="corner4" style="bottom: 0; right: 0;">
+    <img src="teddy.png" class="center-teddy" id="centerTeddy" style="top: 50%; left: 50%; transform: translate(-50%, -50%) scale(0);">
+    
+    <script>
+        let hugMeter = 0;
+        let progress = 0;
+        let isGrowing = true;
+        let interval;
+        let teddy = document.getElementById("teddy");
+        let targetZone = document.getElementById("targetZone");
+        let winSound = document.getElementById("winSound");
+        let finalSound = document.getElementById("finalSound");
+        
+        function updateBar() {
+            if (isGrowing) {
+                hugMeter += 7;
+                if (hugMeter >= 100) isGrowing = false;
+            } else {
+                hugMeter -= 7;
+                if (hugMeter <= 0) isGrowing = true;
+            }
+            document.getElementById("fill").style.width = hugMeter + "%";
+        }
+        
+        function randomizeTargetZone() {
+            let randomPosition = Math.floor(Math.random() * 85);
+            targetZone.style.left = randomPosition + "%";
+        }
+        
+        function showWinningAnimation() {
+            let images = ["corner1", "corner2", "corner3", "corner4"];
+            images.forEach((id, index) => {
+                setTimeout(() => {
+                    let img = document.getElementById(id);
+                    img.style.opacity = "1";
+                    img.style.width = "50%";
+                    img.style.height = "50%";
+                }, index * 9000);
+            });
+            
+            setTimeout(() => {
+                let centerTeddy = document.getElementById("centerTeddy");
+                centerTeddy.style.display = "block";
+                centerTeddy.style.opacity = "1";
+                centerTeddy.style.transform = "translate(-50%, -50%) scale(1)";
+                finalSound.play();
+            }, 40000);
+        }
+        
+        interval = setInterval(updateBar, 25);
+        randomizeTargetZone();
+        
+        document.addEventListener("keydown", function(event) {
+            if (event.code === "Space") {
+                let message = document.getElementById("message");
+                let targetStart = parseInt(targetZone.style.left);
+                let targetEnd = targetStart + 15;
+                
+                if (hugMeter >= targetStart && hugMeter <= targetEnd) {
+                    progress += 10;
+                    if (progress > 100) {
+                        progress = 100;
+                        message.textContent = "You Won! 🎉";
+                        teddy.classList.add("dance");
+                        winSound.play();
+                        showWinningAnimation();
+                    }
+                    document.getElementById("progress").style.width = progress + "%";
+                    randomizeTargetZone();
+                } else {
+                    message.textContent = "Oops! Try again! 😅";
+                }
+            }
+        });
+    </script>
+</body>
+</html>
